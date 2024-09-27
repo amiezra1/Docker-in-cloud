@@ -4,39 +4,43 @@ import json
 import os
 import logging
 
+CONFIG_PATH = "config.json"
 
-def init():
-    global permissions_set, logger
+def loadConfig():
+    try:
+        with open(CONFIG_PATH) as config_file:
+            return set(json.load(config_file))
+    except FileNotFoundError:
+        logger.critical("Error: Config file missing")
 
+def savePermissions(permissions_set):
+    with open(CONFIG_PATH, "w") as json_file:
+        json.dump(list(permissions_set), json_file, indent=4)
+
+def initLogger():
     logger = logging.getLogger(__name__)
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s|%(funcName)s|%(levelname)s|%(message)s',
         handlers=[
-            logging.FileHandler("app.log"),  # Log to a file
-            logging.StreamHandler()          # Also log to the console
+            logging.FileHandler("app.log"),
+            logging.StreamHandler()
         ]
     )
-
-    try:
-        with open("config.json") as config:
-            permissions_list = json.load(config)
-            permissions_set = set(permissions_list)
-        logger.info("File Permissions loaded successfully")
-    except FileNotFoundError:
-        logger.critical("Error: Config file missing")
-
+    return logger
 
 def createPage(text, size=20):
-    title = text
     input_box = createTextInputConnection()
     button = createButtonConnection("Click Here", size)
     script = createRedirectScript()
     
-    return title + input_box + button + script
+    return text + input_box + button + script
 
 
 app = Flask(__name__)
+logger = initLogger()
+permissions_set = loadConfig()
+
 @app.route("/")
 def homePage():
     try:
@@ -50,7 +54,7 @@ def homePage():
 def connect(name):
     try:
         name = name.lower()
-        logger.info(f"The user has accessed the lpgin with name {name}")
+        logger.info(f"The user has accessed the login with name {name}")
         if name in permissions_set:
             logger.info(f"Name {name} exists in list, access granted.")
             response = printGreen(f"{name.capitalize()} Welcome to my system!")
@@ -78,8 +82,7 @@ def addNema(name):
         logger.info("The user tried to connect")
         permissions_set.add(name)
 
-        with open("config.json", "w") as json_file:
-            json.dump(list(permissions_set), json_file, indent=4)
+        savePermissions(permissions_set)
 
         logger.info(f"The name {name} has been successfully added")
         response = printGreen(f"The name {name} has been successfully added")
@@ -87,6 +90,7 @@ def addNema(name):
         return response
     except Exception as e:
         logger.critical(f"Error: {e}")
+
 
 
 if __name__ == "__main__":
