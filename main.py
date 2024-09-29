@@ -65,18 +65,18 @@ def connect(name):
     except Exception as e:
         logger.critical(f"Error: {e}")
 
-@app.route("/addNema")
-def pageAddNema():
+@app.route("/addName")
+def pageaddName():
     try:
         response= "If you want to register, you need to add /(your name) in the URL"
-        response_example = "Example: http://localhost/addNema/david" 
-        logger.info("The user has reached the page 'addNema'")
+        response_example = "Example: http://localhost/addName/david" 
+        logger.info("The user has reached the page 'addName'")
         return printBlue(response,30)+printBlue(response_example,20)
     except Exception as e:
         logger.critical(f"Error: {e}")
 
-@app.route("/addNema/<name>")
-def addNema(name):
+@app.route("/addName/<name>")
+def addName(name):
     try:
         name = name.lower()
         logger.info("The user tried to connect")
